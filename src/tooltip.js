@@ -34,7 +34,7 @@
             ,   snapDistance = 0   //Tolerance allowed before tooltip is moved from its current position (creates 'snapping' effect)
             ,   fixedTop = null //If not null, this fixes the top position of the tooltip.
             ,   classes = null  //Attaches additional CSS classes to the tooltip DIV that is created.
-            ,   chartContainer = null   //Parent dom element of the SVG that holds the chart.
+            ,   chartContainer = document.body   //Parent dom element of the SVG that holds the chart.
             ,   hidden = true  // start off hidden, toggle with hide/show functions below
             ,   hideDelay = 400  // delay before the tooltip hides after calling hide()
             ,   tooltip = null // d3 select of tooltipElem below
@@ -243,6 +243,13 @@
                 // adjust tooltip offsets
                 left -= offset.left;
                 top -= offset.top;
+                
+                //added fix for widget on top of tooltip
+                left = event.pageX+5;
+                if (left+width+10 > windowWidth) left = left - width - 10;
+                top = event.pageY-(height / 2);
+                if (top+(height / 2) + 10 > windowHeight) top = top - (height / 2) - 5;
+                if (top-window.pageYOffset < 0 ) top = window.pageYOffset+50;
 
                 // using tooltip.style('transform') returns values un-usable for tween
                 var box = tooltipElem.getBoundingClientRect();
