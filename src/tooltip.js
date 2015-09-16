@@ -29,7 +29,7 @@
         }
         */
         var data = null;
-        var gravity = 'w'   //Can be 'n','s','e','w'. Determines how tooltip is positioned.
+        var gravity = 'body'   //Can be 'n','s','e','w'. Determines how tooltip is positioned.
             ,   distance = 25   //Distance to offset tooltip from the mouse location.
             ,   snapDistance = 0   //Tolerance allowed before tooltip is moved from its current position (creates 'snapping' effect)
             ,   fixedTop = null //If not null, this fixes the top position of the tooltip.
@@ -109,12 +109,12 @@
 
             trowEnter.append("td")
                 .classed("key",true)
-                .classed("total",function(p) { return !!p.total})
-                .html(function(p, i) { return keyFormatter(p.key, i)});
+                .html(function(p, i) {return keyFormatter(p.key, i)});
 
             trowEnter.append("td")
                 .classed("value",true)
                 .html(function(p, i) { return valueFormatter(p.value, i) });
+
 
             trowEnter.selectAll("td").each(function(p) {
                 if (p.highlight) {
@@ -163,6 +163,7 @@
                 windowHeight = window.innerWidth >= document.body.scrollWidth ? windowHeight : windowHeight - 16;
                 windowWidth = window.innerHeight >= document.body.scrollHeight ? windowWidth : windowWidth - 16;
 
+                //console.log(event.clientY);
 
                 //Helper functions to find the total offsets of a given DOM element.
                 //Looks up the entire ancestry of an element, up to the first relatively positioned element.
@@ -205,7 +206,7 @@
                         tLeft = tooltipLeft(tooltipElem);
                         tTop = tooltipTop(tooltipElem);
                         if (tLeft + width > windowWidth) left = pos[0] - width - distance;
-                        if (tTop < scrollTop) top = scrollTop - tTop + top;
+                        if (tTop < scrollTop) top = scrollTop + 5;
                         if (tTop + height > scrollTop + windowHeight) top = scrollTop + windowHeight - tTop + top - height;
                         break;
                     case 'n':
@@ -226,30 +227,24 @@
                         if (tLeft + width > windowWidth) left = left - width/2 + 5;
                         if (scrollTop > tTop) top = scrollTop;
                         break;
+                    case 'body':
+                        left = event.pageX+5;
+                        if (left+width+10 > windowWidth) left = left - width - 10;
+                        top = event.pageY-(height / 2);
+                        if (top+(height / 2) + 10 > windowHeight) top = top - (height / 2) - 5;
+                        if (top-window.pageYOffset < 0 ) top = window.pageYOffset+50;
+                        break;
                     case 'none':
                         left = pos[0];
                         top = pos[1] - distance;
                         tLeft = tooltipLeft(tooltipElem);
                         tTop = tooltipTop(tooltipElem);
                         break;
-                    case 'center':
-                        left = pos[0] - (width / 2);
-                        top = pos[1] - (height / 2);
-                        tLeft = tooltipLeft(container);
-                        tTop = tooltipTop(container);
-                        break;
                 }
 
                 // adjust tooltip offsets
                 left -= offset.left;
                 top -= offset.top;
-                
-                //added fix for widget on top of tooltip
-                left = event.pageX+5;
-                if (left+width+10 > windowWidth) left = left - width - 10;
-                top = event.pageY-(height / 2);
-                if (top+(height / 2) + 10 > windowHeight) top = top - (height / 2) - 5;
-                if (top-window.pageYOffset < 0 ) top = window.pageYOffset+50;
 
                 // using tooltip.style('transform') returns values un-usable for tween
                 var box = tooltipElem.getBoundingClientRect();
@@ -277,10 +272,9 @@
                         .styleTween('transform', function (d) {
                             return translateInterpolator;
                         }, 'important')
-                        // Safari has its own `-webkit-transform` and does not support `transform`
+                        // Safari has its own `-webkit-transform` and does not support `transform` 
                         // transform tooltip without transition only in Safari
                         .style('-webkit-transform', new_translate)
-                        .style('-ms-transform', new_translate)
                         .style('opacity', 1);
                 }
 
@@ -312,7 +306,7 @@
             if (!tooltip) {
                 var body;
                 if (chartContainer) {
-                    body = chartContainer;
+                    body = document.body;//chartContainer;
                 } else {
                     body = document.body;
                 }
