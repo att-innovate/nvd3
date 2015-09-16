@@ -163,8 +163,6 @@
                 windowHeight = window.innerWidth >= document.body.scrollWidth ? windowHeight : windowHeight - 16;
                 windowWidth = window.innerHeight >= document.body.scrollHeight ? windowWidth : windowWidth - 16;
 
-                //console.log(event.clientY);
-
                 //Helper functions to find the total offsets of a given DOM element.
                 //Looks up the entire ancestry of an element, up to the first relatively positioned element.
                 var tooltipTop = function ( Elem ) {
@@ -228,9 +226,9 @@
                         if (scrollTop > tTop) top = scrollTop;
                         break;
                     case 'body':
-                        left = event.pageX+5;
+                        left = d3.event.pageX+5;
                         if (left+width+10 > windowWidth) left = left - width - 10;
-                        top = event.pageY-(height / 2);
+                        top = d3.event.pageY - (height / 2);
                         if (top+(height / 2) + 10 > windowHeight) top = top - (height / 2) - 5;
                         if (top-window.pageYOffset < 0 ) top = window.pageYOffset+50;
                         break;
