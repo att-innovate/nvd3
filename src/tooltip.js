@@ -29,12 +29,12 @@
         }
         */
         var data = null;
-        var gravity = 'body'   //Can be 'n','s','e','w'. Determines how tooltip is positioned.
+        var gravity = 'w'   //Can be 'n','s','e','w'. Determines how tooltip is positioned.
             ,   distance = 25   //Distance to offset tooltip from the mouse location.
             ,   snapDistance = 0   //Tolerance allowed before tooltip is moved from its current position (creates 'snapping' effect)
             ,   fixedTop = null //If not null, this fixes the top position of the tooltip.
             ,   classes = null  //Attaches additional CSS classes to the tooltip DIV that is created.
-            ,   chartContainer = document.body   //Parent dom element of the SVG that holds the chart.
+            ,   chartContainer = null   //Parent dom element of the SVG that holds the chart.
             ,   hidden = true  // start off hidden, toggle with hide/show functions below
             ,   hideDelay = 400  // delay before the tooltip hides after calling hide()
             ,   tooltip = null // d3 select of tooltipElem below
@@ -109,7 +109,8 @@
 
             trowEnter.append("td")
                 .classed("key",true)
-                .html(function(p, i) {return keyFormatter(p.key, i)});
+                .classed("total",function(p) { return !!p.total})
+                .html(function(p, i) { return keyFormatter(p.key, i)});
 
             trowEnter.append("td")
                 .classed("value",true)
@@ -204,7 +205,7 @@
                         tLeft = tooltipLeft(tooltipElem);
                         tTop = tooltipTop(tooltipElem);
                         if (tLeft + width > windowWidth) left = pos[0] - width - distance;
-                        if (tTop < scrollTop) top = scrollTop + 5;
+                        if (tTop < scrollTop) top = scrollTop - tTop + top;
                         if (tTop + height > scrollTop + windowHeight) top = scrollTop + windowHeight - tTop + top - height;
                         break;
                     case 'n':
@@ -238,6 +239,12 @@
                         tLeft = tooltipLeft(tooltipElem);
                         tTop = tooltipTop(tooltipElem);
                         break;
+                    case 'center':
+                        left = pos[0] - (width / 2);
+                        top = pos[1] - (height / 2);
+                        tLeft = tooltipLeft(container);
+                        tTop = tooltipTop(container);
+                        break;
                 }
 
                 // adjust tooltip offsets
@@ -270,9 +277,10 @@
                         .styleTween('transform', function (d) {
                             return translateInterpolator;
                         }, 'important')
-                        // Safari has its own `-webkit-transform` and does not support `transform` 
+                        // Safari has its own `-webkit-transform` and does not support `transform`
                         // transform tooltip without transition only in Safari
                         .style('-webkit-transform', new_translate)
+                        .style('-ms-transform', new_translate)
                         .style('opacity', 1);
                 }
 
@@ -304,7 +312,7 @@
             if (!tooltip) {
                 var body;
                 if (chartContainer) {
-                    body = document.body;//chartContainer;
+                    body = chartContainer;
                 } else {
                     body = document.body;
                 }
